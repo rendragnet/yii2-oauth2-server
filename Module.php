@@ -154,6 +154,33 @@ class Module extends \yii\base\Module
         return $this->get('response');
     }
 
+    public function beforeAction($action) {
+      // Set the CORS header?
+      if(Yii::$app->request->headers['Origin']!=null) {
+        // Is the Origin in our params?
+        /**
+         * Origin config should be in api/config/params-local.php in the following format (one line per allowed origin):
+         *
+         *  'CorsOrigins' => [
+         *    'https://local-test.mysau.com.au:5443' => 'https://local-test.mysau.com.au:5443',
+         *  ],
+         *
+         */
+        if (isset(Yii::$app->params['CorsOrigins']) && isset(Yii::$app->params['CorsOrigins'][Yii::$app->request->headers['Origin']])) {
+          // yep, so send the correct Allow-Origin header, as well as the Allow-Headers for the headers we need.  These should be it, I think.
+          Yii::$app->response->headers->add('Access-Control-Allow-Origin', Yii::$app->params['CorsOrigins'][Yii::$app->request->headers['Origin']]);
+          Yii::$app->response->headers->add('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept-Encoding, Accept-Language');
+        }
+      }
+      try {
+        return parent::beforeAction($action);
+      } catch (\Exception $e) {
+        // We need to set the encoding, and then encode it.  Sigh, thanks Yii
+        return $this->errorHandler->accessConvertExceptionToArray($e);
+      }
+    }
+
+
     /**
      * Register translations for this module
      * 
