@@ -33,4 +33,12 @@ class RestController extends \yii\rest\Controller
         $response = $this->module->getServer()->handleRevokeRequest();
         return $response->getParameters();
     }
+
+    /** 
+      * Blank function to handle OPTIONS requests to all endpoints.  Returns nothing, as the headers are handled in the module.
+      */
+    public function actionOptions() {
+      return true;
+    }
+           
 }
